@@ -1,0 +1,38 @@
+---
+
+name: Git release action
+description: GitHub action for creating git semantic versions
+branding:
+  icon: bookmark
+  color: green
+runs:
+  using: composite
+  steps:
+    - name: Get versions
+      uses: applicreation/versions-action@v1
+      id: versions
+    - name: Delete minor release tags (local)
+      shell: sh
+      run: git tag -d ${{ steps.versions.outputs.minor }}
+      continue-on-error: true
+    - name: Delete major release tags (local)
+      shell: sh
+      run: git tag -d ${{ steps.versions.outputs.major }}
+      continue-on-error: true
+    - name: Delete minor release tags (remote)
+      shell: sh
+      run: git push origin --delete ${{ steps.versions.outputs.minor }}
+      continue-on-error: true
+    - name: Delete major release tags (remote)
+      shell: sh
+      run: git push origin --delete ${{ steps.versions.outputs.major }}
+      continue-on-error: true
+    - name: Tag minor version
+      shell: sh
+      run: git tag ${{ steps.versions.outputs.minor }}
+    - name: Tag major version
+      shell: sh
+      run: git tag ${{ steps.versions.outputs.major }}
+    - name: Push tags
+      shell: sh
+      run: git push origin --tags
