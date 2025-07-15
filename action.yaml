@@ -1,38 +1,56 @@
 ---
 
 name: Git release action
-description: GitHub action for creating git semantic versions
+description: GitHub action for tagging git semantic versions
 branding:
   icon: bookmark
   color: green
+inputs:
+  use_prefix:
+    description: If true, add "v" prefix to tags
+    default: true
+    required: false
+  major:
+    description: Major version number
+    required: true
+  minor:
+    description: Minor version number
+    required: true
+  patch:
+    description: Patch version number
+    required: true
 runs:
   using: composite
   steps:
-    - name: Get versions
-      uses: applicreation/versions-action@v1
-      id: versions
-    - name: Delete minor release tags (local)
-      shell: sh
-      run: git tag -d ${{ steps.versions.outputs.minor }}
-      continue-on-error: true
-    - name: Delete major release tags (local)
-      shell: sh
-      run: git tag -d ${{ steps.versions.outputs.major }}
-      continue-on-error: true
-    - name: Delete minor release tags (remote)
-      shell: sh
-      run: git push origin --delete ${{ steps.versions.outputs.minor }}
-      continue-on-error: true
-    - name: Delete major release tags (remote)
-      shell: sh
-      run: git push origin --delete ${{ steps.versions.outputs.major }}
-      continue-on-error: true
-    - name: Tag minor version
-      shell: sh
-      run: git tag ${{ steps.versions.outputs.minor }}
-    - name: Tag major version
-      shell: sh
-      run: git tag ${{ steps.versions.outputs.major }}
+    - name: Validate version inputs
+      shell: bash
+      run: |
+        if [[ ! ${{ inputs.patch }} =~ ^[0-9]+$ ]]; then
+          echo "Invalid patch version format. Expected a number."
+          exit 1
+        fi
+        if [[ ! ${{ inputs.minor }} =~ ^[0-9]+$ ]]; then
+          echo "Invalid patch version format. Expected a number."
+          exit 1
+        fi
+        if [[ ! ${{ inputs.major }} =~ ^[0-9]+$ ]]; then
+          echo "Invalid patch version format. Expected a number."
+          exit 1
+        fi
+    - name: Tag semantic versions
+      shell: bash
+      run: |
+        if [[ "${{ inputs.use_prefix }}" == "true" ]]; then
+          prefix="v"
+        else
+          prefix=""
+        fi
+        major="${{ inputs.major }}"
+        minor="${{ inputs.minor }}"
+        patch="${{ inputs.patch }}"
+        git tag -f "${prefix}${major}"
+        git tag -f "${prefix}${major}.${minor}"
+        git tag -f "${prefix}${major}.${minor}.${patch}"
     - name: Push tags
-      shell: sh
-      run: git push origin --tags
+      shell: bash
+      run: git push origin -f --tags
