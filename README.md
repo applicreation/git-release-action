@@ -17,7 +17,7 @@ jobs:
       - uses: applicreation/versions-action@v2
         id: versions
         with:
-          tag: ${{ github.ref }}
+          tag: ${{ github.ref_name }}
       - uses: applicreation/git-release-action@v2
         with:
           use_prefix: ${{ steps.versions.outputs.has_prefix }}
