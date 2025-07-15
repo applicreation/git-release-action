@@ -2,7 +2,7 @@
 
 repository:
   name: git-release-action
-  description: GitHub action for creating git semantic versions
+  description: GitHub action for tagging git semantic versions
   homepage: https://github.com/applicreation/git-release-action
   topics: github-actions-versions, github-actions, semantic-versions, versions
   private: false
